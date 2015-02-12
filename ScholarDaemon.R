@@ -11,9 +11,6 @@ gmail_auth('gmail_authfile.json')
 Base64URL_Decode_To_Char <- function(x) { rawToChar(Base64URL_Decode(x)) }
 Base64URL_Decode <- function(x) { base64decode(gsub("_", "/", gsub("-", "+", x))) }
 
-# Gmail message reading functions
-
-
 # Gmail parsing functions
 GetPaper <- function(article) {
   # declare a function to capitalise the first letter of any ALL CAPS titles given by Google Scholar
@@ -68,16 +65,11 @@ CreateTwitterAuthfile <- function(authfile.name = 'twitter_authfile.json') {
   cat('\nCredentials stored in',authfile.name)
 }
 
-if (file.exists('sd_config.json')){
-  # read file
-} else ScholarDaemonConfig()
-
 ScholarDaemonConfig <- function(config.filename = 'sd_config.json') {
-  cat('Enter some details to set up Scholar Daemon')
+  cat('Enter the default query your Google Scholar Alerts are set up for (will be used to find new results)\n')
   abortSDConfig <- function() { stop("Re-run ScholarDaemonConfig() to set up default settings.") }
   
-  # for each credential listed, assign a new variable, named by lowering the user prompt to snake case and appending '_entered'
-  lapply(c('Gmail search term','Alternative','',''),
+  lapply(c('Gmail search term'),
          function(user.message) {
            do.call(ReadNewVar, as.list(sapply(user.message, function(credential){
              c(
@@ -87,15 +79,23 @@ ScholarDaemonConfig <- function(config.filename = 'sd_config.json') {
            })))
          })
   
-  json.string <- paste0('{"info":{"consumer_key":"',api_key_entered,'","consumer_secret":"',api_secret_entered,'","access_token":"',token_key_entered,'","access_secret":"',token_secret_entered,'"}}')
-  twitter.authfile <- file(authfile.name)
-  write(json.string, file = twitter.authfile)
-  close(twitter.authfile)
-  
-  cat('\nCredentials stored in',config.filename)
+  json.string <- paste0('{"info":{"gmail_query":"',gmail_search_term_entered,'"}}')
+  sd.configfile <- file(config.filename)
+  write(json.string, file = sd.configfile)
+  close(sd.configfile)
+  assign('sd.config', ReadSDConfig(), 1) # passes the sd.config object up the stack
+  cat('\nSearch query stored in',config.filename)
 }
 
-# Create a twitter authorisation file if one doesn't exist
+ReadSDConfig <- function() { return(fromJSON('sd_config.json')$info) }
+
+# Create a Scholar Daemon config file if one doesn't exist
+
+if (file.exists('sd_config.json') && !exists('sd.config')){
+  sd.config <- ReadSDConfig()
+} else ScholarDaemonConfig()
+
+# Create a Twitter authorisation file if one doesn't exist
 # NB will ignore any alternatively named JSON
 
 if (!file.exists('twitter_authfile.json')) {
@@ -103,9 +103,12 @@ if (!file.exists('twitter_authfile.json')) {
 }
 
 TwitterAuth <- function(authfile.name = 'twitter_authfile.json') {
+  cat('\nAuthorising Twitter\n')
   twitter.authinfo <- fromJSON('twitter_authfile.json')$info
   do.call(setup_twitter_oauth, as.list(twitter.authinfo))
 }
+
+TwitterAuth()
 
 # Dictionary and functions for abbreviating paper titles
 
@@ -143,7 +146,7 @@ InCharLimit <- function(tweet.url.string = '') {
   if (confirmed.http <- grepl('http://',tweet.url.string))
     url.char.count <- http.chars
   
-  return(title.char.limit <- 140L - url.char.count)
+  return(title.char.limit <- 140L - url.char.count - 1)
 }
 # when calling AbbrevTitle on the title such that the URL (hence char. lim.) is taken into account
 
@@ -297,6 +300,88 @@ AbbrevTitle <- function(start.str, known.url = NULL, use.abbreviations = T, max.
 }
 
 WriteTweet <- function(article.summary) {
-  tweet.title <- AbbrevTitle(article.summary$title)
+  tweet.title <- AbbrevTitle(article.summary$title, known.url = article.summary$url)
   return(paste(c(tweet.title,article.summary$url),collapse=" "))
 }
+
+# Gmail message reading functions
+
+ReadMail <- function(mail.id) {
+  mail.resp.full <- message(mail.id, format = "full")
+  mail.resp.full.data <- mail.resp.full$payload$body$data
+  mail.resp.decoded <- gsub('\r\n','',Base64URL_Decode_To_Char(mail.resp.full.data))
+  mail.doc <- htmlParse(mail.resp.decoded, asText=TRUE, encoding = "UTF-8")
+  mail.root <- xmlRoot(mail.doc)
+  article.list <- xmlElementsByTagName(mail.root[["body"]][["div"]],"h3")
+  article.summaries <- lapply(article.list, GetPaper)
+  names(article.summaries) <- NULL
+  return(article.summaries)
+}
+
+GetMail <- function(search.query = sd.config[['gmail_query']]) {
+  if (!exists('sd.config') && missing('search.query')) {
+    cat('Set up a default search query')
+    ScholarDaemonConfig()
+    sd.config <- ReadSDConfig()
+
+    if (exists('sd.config')) {
+      search.query <- sd.config[['gmail_query']]
+    }
+  }
+  
+  message_query <- paste0('from:scholaralerts-noreply@google.com subject:Scholar Alert ',search.query)
+  retrieved.messages <- messages(message_query)
+  message.ids <- sapply(retrieved.messages[[1]][['messages']], function(x) {x$id})
+  sapply(message.ids, ReadMail)
+}
+
+# Handling ID logs
+WriteNewIDs <- function(ids, log.filename = 'gmail_id_log.json', overwrite.log = F) {
+    json.string <- paste0('{"list_seen":[',paste(shQuote(recent.paper.mail.ids, type="cmd"), collapse=", "),']}')
+    log.file <- file(log.filename)
+    write(json.string, file = log.file, append = !overwrite.log)
+    close(log.file)
+}
+
+CheckMessageHistory <- function(ids, log.filename = 'gmail_id_log.json', overwrite.log = F) {
+  if (!file.exists(log.filename)) {
+    WriteNewIDs(ids, log.filename, overwrite.log)
+    # will proceed to use these IDs in tweets
+  } else {
+    # subset IDs to only those not in the JSON
+    past.ids <- fromJSON(log.filename)$list_seen
+    new.ids <- ids[!ids %in% past.ids]
+    if (length(new.ids) == 0) {
+      cat('\nNo new papers')
+    } else {
+      WriteNewIDs(new.ids)
+      # then whip up some tweets
+      new.summaries <- sapply(new.ids, ReadMail)
+      new.tweets <- as.vector(unlist(lapply(new.summaries, function(message) {sapply(message, WriteTweet)})))
+
+      # Send to Twitter API
+      for (new.tweet in new.tweets) {
+        updateStatus(new.tweet, bypassCharLimit = T)
+      }
+    }
+  }
+}
+
+CheckAlerts <- function(confirm = F) {
+  if (confirm) {
+    cat('\nTweet papers now? Hit enter to confirm, or any other key to cancel:\n')
+			confirm.var <- readLines(n=1)
+			if (confirm.var != '') {
+			  confirm.var <- 'Scholar Alerts not checked'
+				return()
+			}
+  }
+  # Should add a preview...
+  recent.papers <- GetMail()
+  recent.paper.mail.ids <- names(recent.papers) # not actually paper names, just the message IDs
+  CheckMessageHistory(recent.paper.mail.ids)
+}
+
+cat(
+  CheckAlerts(confirm = T)
+)
