@@ -242,3 +242,7 @@ The default parameter for `authfile.name` is 'twitter_authfile.json', and after 
 To write a tweet uses the `updateStatus()` function, modified to take [t.co URL shortening](https://dev.twitter.com/overview/t.co) into account with `abbrevTitles()` before passing a tweet to the API call.
 
 > As well as the core `text` parameter, a `mediaPath` can also be passed to `updateStatus`, so pictures such as graphical abstracts could potentially be supplied this way. You can also `searchTwitter`, `getUser`, `twListToDF`, `userTimeline`, `homeTimeline` - see the [vignette](http://geoffjentry.hexdump.org/twitteR.pdf) for full details.
+
+### Automation
+
+An almost-working script to run the automation of this is in `check_mail.Rscript`, run with the `Rscript` command from a shell. It doesn't wait for paper IDs to be received so probably needs some sort of callback function.

@@ -1,0 +1,43 @@
+#!/usr/bin/Rscript
+
+# Add an environment variable 'ScholarDaemon' to .bashrc
+# else search for it in user home directory
+
+GoToSDdir <- function(bypass.sys.check = F) {
+  RDirCheck <- function() {
+    posswds <- list.files(Sys.getenv("HOME"), pattern = '.*ScholarDaemon$', include.dirs = T, recursive = T)
+    if (length(posswds) > 0) {
+      for (posswd in posswds) {
+          posswd.files <- list.files(path = path.expand(paste0("~/",posswd)))
+          if ('ScholarDaemon.R' %in% posswd.files) {
+          setwd(posswd)
+            return(file.path('ScholarDaemon.R'))
+          }
+        }
+        if (!grepl("S/ScholarDaemon$", getwd())) return(NA)
+      }
+      return(NA)
+  }
+  
+  if (!grepl("/ScholarDaemon$",getwd()) && !bypass.sys.check) {
+    if (Sys.getenv('ScholarDaemon') != '') {
+      setwd(Sys.getenv('ScholarDaemon'))
+      return(file.path('ScholarDaemon.R'))
+    } else {
+      return(RDirCheck())
+    }
+  } else if (bypass.sys.check) {RDirCheck()} else {
+    return(file.path('ScholarDaemon.R'))
+  }
+  # should pretty definitely know where the daemon is now and be in its directory
+}
+
+if (!file.exists('ScholarDaemon.R')) {
+  found.daemon <- GoToSDdir()
+  if (is.na(find.daemon)) {
+    stop("Unable to find daemon. Please put it in the same directory as this script, as in the GitHub repo at https://github.com/lmmx/ScholarDaemon")
+  }
+} else found.daemon <- file.path('ScholarDaemon.R')
+
+no.confirm <- T
+source(found.daemon)

@@ -383,5 +383,5 @@ CheckAlerts <- function(confirm = F) {
 }
 
 cat(
-  CheckAlerts(confirm = T)
+  CheckAlerts(confirm = !exists('no.confirm')) # set a variable no.confirm = T to skip tweet confirmation
 )
