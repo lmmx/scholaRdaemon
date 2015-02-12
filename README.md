@@ -1,14 +1,14 @@
-# Google Scholar Alerts Twitter bot
+## :mag_right: :hatched_chick: :page_with_curl: Google Scholar Alerts Twitter bot :page_with_curl: :hatched_chick: :mag_right:
 
 Google Scholar lacks an API, but unlike PubMed **links directly to papers**. Often the stream of a Pubmed-sourced bot is filled with papers not deposited with direct links. *Occasionally* they will have a DOI, but Medline's indexing of these is inconsistent (the XML for articles themselves can be pretty inconsistent as I found out on [a previous excursion under Pubmed's bonnet](https://github.com/lmmx/watir-paper-scanner)).
 
-Even when a paper is deposited with this identifier, the DOI minting process means it's not guaranteed that the link will work - I myself have felt (and regularly see other scientists online expressing the same) frustration at having the basic line of scientific enquiry rudely interrupted by technical issues.
+Even when a paper is deposited with this identifier, the DOI minting process means it's not guaranteed that the link will work straight away - I myself have felt (and regularly see other scientists online expressing the same) frustration at having the basic line of scientific enquiry rudely interrupted by technical issues. Preprints are another consideration.
 
 [![](https://pbs.twimg.com/media/Bd3Hj2GCIAABX-E.jpg)](http://arxiv.org/year/q-bio/13) <small>*[via](https://twitter.com/nextgenseek/status/422713358668668929)*</small>
 
-> <sup>Preprints are undeniably [coming into the fold of bioscience research](https://www.youtube.com/watch?v=G1ffCDBPiOA), a practice originating in the physics/mathematical sciences that crept in through [common ground](https://twitter.com/leonidkruglyak/status/335422823025741826) of arXiv [q-bio](http://arxiv.org/archive/q-bio). There are various dedicated sites/accounts monitoring particular subfields (e.g. [Haldane's sieve](haldanessieve.org)/@[haldanessieve](https://twitter.com/haldanessieve) for population/evolutionary genetics).
+> Preprints are undeniably [coming into the fold of bioscience research](https://www.youtube.com/watch?v=G1ffCDBPiOA), a practice originating in the physics/mathematical sciences that [crept in through common ground](https://twitter.com/leonidkruglyak/status/335422823025741826) at arXiv's [q-bio](http://arxiv.org/archive/q-bio) section. There are various dedicated sites/accounts monitoring particular subfields (e.g. [Haldane's sieve](haldanessieve.org)/@[haldanessieve](https://twitter.com/haldanessieve) for population/evolutionary genetics).
 >
-> <sup>Google Scholar indexes all fields, and in my own experience this leads to casual interdisciplinary reading in a way not possible from Pubmed's purely biomedical library - a facet of research which the [*BBSRC*, *MRC* and the *Society of Biology* feel is lacking amongst bioscientists](http://www.bbsrc.ac.uk/news/people-skills-training/2015/150204-n-report-vulnerable-research-skills-capabilities.aspx).
+> Google Scholar indexes all fields, and in my own experience this leads to casual interdisciplinary reading in a way not possible from Pubmed's purely biomedical library - a facet of research which the [*BBSRC*, *MRC* and the *Society of Biology* feel is lacking amongst bioscientists](http://www.bbsrc.ac.uk/news/people-skills-training/2015/150204-n-report-vulnerable-research-skills-capabilities.aspx).
 
 ### Creating a feed of interest through Google Scholar
 
@@ -20,11 +20,9 @@ This script checks for Google Scholar Alerts in a Gmail account, parses through 
 
 * this could perhaps be automated with a cron job like Lynn Root used for her [*IfMeetThenTweet*](https://github.com/econchick/IfMeetThenTweet/) IFTTT alternative
 * it could also perhaps be hosted on a free micro instance of Amazon Web Services EC2 (but I've not tried yet) *etc.*
-* sending the papers to [Buffer](https://bufferapp.com/guides) doesn't make much sense since it seems to be at most 1 email a day, though perhaps other queries may vary - let me know if you make use of this
+* sending the papers to [Buffer](https://bufferapp.com/guides) doesn't make much sense since it seems to be at most 1 email a day, though perhaps other queries may vary
 
 ### 1: Gmail checker
-
-> <small>At time of writing, there's an unresolved issue with [`gmailr`'s email sending ability](https://github.com/jimhester/gmailr/issues/11), but that's not of interest so I went with R.</small>
 
 ```r
 install.packages('gmailr')
@@ -112,7 +110,7 @@ The 'full' data of `eg.msg.resp.full.data` contains a comparable HTML 'payload' 
 
 ###2: Message parsing
 
-There are two kinds of Google Scholar Alert: citations of a particular paper (which I won't use here) and custom results for a search query - I currently have one set up to keep an eye *microRNA oscillation* literature, and can filter the Scholar Alerts in my inbox for solely these with:
+There are two kinds of Google Scholar Alert: citations of a particular paper (which I won't use here) and custom results for a search query - I currently have one set up to keep an eye on *microRNA oscillation* literature, and can filter the Scholar Alerts in my inbox for solely these with:
 
 ```r
 scholar.alerts.mo <- messages('Scholar Alert microRNA oscillation')
@@ -224,7 +222,11 @@ new.tweets <- as.vector(unlist(lapply(new.summaries, function(message) {sapply(m
 
 ### 3.2: Option 1: Send papers to Twitter
 
-[`twitteR`](https://github.com/geoffjentry/twitteR) has a few dependencies which should be
+[`twitteR`](https://github.com/geoffjentry/twitteR) has a few dependencies obtained with:
+
+```r
+install.packages(c("devtools", "rjson", "bit64", "httr"))
+```
 
 Then authorise a new application in the [Twitter developer console](https://apps.twitter.com), which requires you to [verify a mobile number](https://twitter.com/settings/devices). Make sure to turn off the text notifications, which are all on by default.
 
@@ -237,8 +239,8 @@ Then authorise a new application in the [Twitter developer console](https://apps
 
 The default parameter for `authfile.name` is 'twitter_authfile.json', and after prompts the file is stored in the working directory.
 
-`TwitterAuth()` wraps `setup_twitter_oauth` to authenticate using the same file (again a different file can be specified with the `authfile.name` parameter). See the [wiki page for manual authenication details](https://github.com/lmmx/ScholarDaemon/wiki/Manual-authentication-details), but the R code `source`d above should take care of things with `CreateTwitterAuthFile()`.
+* `TwitterAuth()` wraps `setup_twitter_oauth` to authenticate using the same file (again a different file can be specified with the `authfile.name` parameter).
+* See the [wiki page for manual authenication details](https://github.com/lmmx/ScholarDaemon/wiki/Manual-authentication-details), but the R code `source`'d above should take care of things with the function `CreateTwitterAuthFile()`. I've tried to make the setup method fairly interactive.
+* To write a tweet uses the `updateStatus()` function, modified to take [t.co URL shortening](https://dev.twitter.com/overview/t.co) into account with `abbrevTitles()` before passing a tweet to the API call.
 
-To write a tweet uses the `updateStatus()` function, modified to take [t.co URL shortening](https://dev.twitter.com/overview/t.co) into account with `abbrevTitles()` before passing a tweet to the API call.
-
-> As well as the core `text` parameter, a `mediaPath` can also be passed to `updateStatus`, so pictures such as graphical abstracts could potentially be supplied this way. You can also `searchTwitter`, `getUser`, `twListToDF`, `userTimeline`, `homeTimeline` - see the [vignette](http://geoffjentry.hexdump.org/twitteR.pdf) for full details.
+As well as the core `text` parameter which is all this script uses, a `mediaPath` can also be passed to `updateStatus`, so pictures such as graphical abstracts could potentially be supplied this way. You can also `searchTwitter`, `getUser`, `twListToDF`, `userTimeline`, `homeTimeline` - see the `twitteR` [vignette](http://geoffjentry.hexdump.org/twitteR.pdf) for full details.
