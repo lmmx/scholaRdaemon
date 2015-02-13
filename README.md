@@ -222,7 +222,7 @@ new.tweets <- as.vector(unlist(lapply(new.summaries, function(message) {sapply(m
 [2] "Notch in memories: Points to remember http://onlinelibrary.wiley.com/doi/10.1002/hipo.22426/abstract"
 [3] "Glucocorticoids and 11β-hydroxysteroid dehydrogenases: mechanisms for hypertension http://www.sciencedirect.com/science/article/pii/S1471489215000065"</pre>
 
-### 3.2: Option 1: Send papers to Twitter
+### 3.2: Send papers to Twitter
 
 [`twitteR`](https://github.com/geoffjentry/twitteR) has a few dependencies obtained with:
 
@@ -249,4 +249,4 @@ As well as the core `text` parameter which is all this script uses, a `mediaPath
 
 ### Automation
 
-An almost-working script to run the automation of this is in `check_mail.Rscript`, run with the `Rscript` command from a shell. It doesn't wait for paper IDs to be received so probably needs some sort of callback function.
+A working script to run the automation (not setup) of tweet generation is in `check_mail.Rscript`. Run it with `Rscript check_mail.Rscript` command from a shell, with `--help` to see the available flags.
