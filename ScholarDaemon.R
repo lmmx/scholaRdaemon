@@ -379,7 +379,9 @@ CheckAlerts <- function(confirm = F) {
   # Should add a preview...
   recent.papers <- GetMail()
   recent.paper.mail.ids <- names(recent.papers) # not actually paper names, just the message IDs
-  CheckMessageHistory(recent.paper.mail.ids)
+  if (exists('debug.mode')) {print(recent.paper.mail.ids)} else { # switch for debugging, pass in a variable as arg
+    CheckMessageHistory(recent.paper.mail.ids)
+  }
 }
 
 cat(

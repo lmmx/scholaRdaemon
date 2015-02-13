@@ -3,6 +3,33 @@
 # Add an environment variable 'ScholarDaemon' to .bashrc
 # else search for it in user home directory
 
+args <- commandArgs(TRUE)
+
+# if ("--debug" %in% args) debug.mode <- T
+# if ("-h" %in% args || "--help" %in% args) 
+
+# Better to do the above systematically with some sort of [potentially degenerate] list data structure holding outcomes of flags
+
+flag.details <- list("debug" = list(def = "Print message IDs rather than sending them through the tweet making process", flag = "--debug", output = "debug.mode <- T"),
+                          "help" = list(def = "Display flag definitions", flag = c("-h","--help"), output = "cat(help.prompt); quit();")
+                           )
+
+flag.conditions <- lapply(flag.details, function(x) {paste0(paste0('"',x$flag,'"'), sep = " %in% args", collapse = " || ")})
+flag.truth.table <- unlist(lapply(flag.conditions, function(x) {
+  if (eval(parse(text = x))) {
+    return(T)
+  } else return(F)
+}))
+
+help.prompts <- lapply(names(flag.truth.table), function(x){ # joins 2-space-separatated flags with a tab-space to the flag description
+                                                  paste0(c(paste0(flag.details[x][[1]][['flag']], collapse="  "),
+                                                                  flag.details[x][[1]][['def']]), collapse="\t")  } )
+help.prompt <- paste(c(unlist(help.prompts),''),collapse="\n\n")
+
+# The following lines handle the flags, running the corresponding 'output' entry in flag.details for any supplied
+flag.output <- unlist(lapply(names(flag.truth.table), function(x){if (flag.truth.table[x]) return(flag.details[x][[1]][['output']])}))
+eval(parse(text = flag.output))
+
 GoToSDdir <- function(bypass.sys.check = F) {
   RDirCheck <- function() {
     posswds <- list.files(Sys.getenv("HOME"), pattern = '.*ScholarDaemon$', include.dirs = T, recursive = T)
