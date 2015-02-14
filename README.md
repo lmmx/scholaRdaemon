@@ -259,6 +259,6 @@ crontab -l
 0 15-23 * * * cd /Users/davetang/Dropbox/transcriptomes && ./feed.R &> /dev/null
 ```
 
-Cron automation makes sense for daily MEDLINE (PubMed) updates, but not for emails - IFTTT-like 'triggering' would be ideal, and can be achieved with custom 'events' through the Amazon Lambda service, which can run without a server instance off AWS S3 file storage, which may be modified under version control e.g. [`dat`](http://dat-data.com/)` pull --live`).
+Cron automation makes sense for daily MEDLINE (PubMed) updates, but not for emails - IFTTT-like 'triggering' would be ideal, and can be achieved with custom 'events' through Amazon Lambda [free tier], reacting to changes in AWS S3 file storage, which [may be modified](https://github.com/jb55/s3-blob-store) with [`dat`](http://dat-data.com/)` pull --live`.
 
 * Wiki: [Proposed workflow with AWS and dat](https://github.com/lmmx/ScholarDaemon/wiki/Draft-workflow-with-AWS-and-dat)
