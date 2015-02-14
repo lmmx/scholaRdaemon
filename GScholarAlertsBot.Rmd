@@ -261,6 +261,24 @@ crontab -l
 
 Cron automation makes sense for daily MEDLINE (PubMed) updates, but not for emails - IFTTT-like 'triggering' would be ideal, and can be achieved with custom 'events' through the Amazon Lambda service, running on the EC2 cloud platform.
 
+#### **Workflow blueprint**
+
+* `Gmail Scholar Alerts and Pubmed, biorXiv, arXiv, PeerJ Preprints, (...) RSS feeds to IFTTT`
+* `IFTTT to [IFTTNode](https://github.com/sebauer/if-this-then-node)`
+* `IFTTN to dat`
+* `dat to S3 blob` (*binary large object* i.e. a file on an AWS server)
+* `S3 blob file change to AWS Lambda trigger`
+* `AWS Lambda to [AWS Lambda function containing] self-contained GScholar Alerts bot R script(s)`
+  * 'scale' up as many bots as you like
+  * for example Wnt pathway bot, component bots could retweet to avoid duplication and pose interesting links for extended reading
+    * e.g. β-catenin noted in abstract of a paper ∴ marked as Wnt pathway paper ∴ tweeted by Wnt pathway account, RT from β-catenin account
+
+---
+
+Obviously potential for more subtle setup - must be useful, not spam, a fun new mode of interaction with the literature. Time limitations against course work, though such a biological network management tool could easily find application away from this toy problem.
+
+<code>TBC</code>
+
 * [AWS Lambda AKA Node.js meets IFTTT as a service!](http://blog.jeffdouglas.com/2015/01/29/aws-lambda-aka-node-js-meets-ifttt-as-a-service/) by Jeff Douglas
   * Sebastian Bauer's [If This Then Node](https://github.com/sebauer/if-this-then-node) on GitHub
   * William Casarin's [s3-blob-store](https://github.com/jb55/s3-blob-store)
@@ -286,21 +304,3 @@ Doing more with R:
 
 * [Data processing with dplyr and tidyr](http://rpubs.com/bradleyboehmke/data_wrangling) by Brad Boehmke on RPubs
 * [Debugging, condition handling and defensive programming](http://adv-r.had.co.nz/Exceptions-Debugging.html) in Hadley Wickham's Advanced R
-
-#### **Workflow blueprint**
-
-* `Gmail Scholar Alerts and Pubmed, biorXiv, arXiv, PeerJ Preprints, (...) RSS feeds to IFTTT`
-* `IFTTT to [IFTTNode](https://github.com/sebauer/if-this-then-node)`
-* `IFTTN to dat`
-* `dat to S3 blob` (*binary large object* i.e. a file on an AWS server)
-* `S3 blob file change to AWS Lambda trigger`
-* `AWS Lambda to [AWS Lambda function containing] self-contained GScholar Alerts bot R script(s)`
-  * 'scale' up as many bots as you like
-  * for example Wnt pathway bot, component bots could retweet to avoid duplication and pose interesting links for extended reading
-    * e.g. β-catenin noted in abstract of a paper ∴ marked as Wnt pathway paper ∴ tweeted by Wnt pathway account, RT from β-catenin account
-
----
-
-Obviously potential for more subtle setup - must be useful, not spam, a fun new mode of interaction with the literature. Time limitations against course work, though such a biological network management tool could easily find application away from this toy problem.
-
-<code>TBC</code>

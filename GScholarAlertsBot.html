@@ -257,6 +257,24 @@ AbbrevTitle(eg.title, max.compact = FALSE)
 #minute hour dom month dow user cmd
 0 15-23 * * * cd /Users/davetang/Dropbox/transcriptomes &amp;&amp; ./feed.R &amp;&gt; /dev/null</code></pre>
 <p>Cron automation makes sense for daily MEDLINE (PubMed) updates, but not for emails - IFTTT-like ‘triggering’ would be ideal, and can be achieved with custom ‘events’ through the Amazon Lambda service, running on the EC2 cloud platform.</p>
+<div id="workflow-blueprint" class="section level4">
+<h4><strong>Workflow blueprint</strong></h4>
+<ul>
+<li><code>Gmail Scholar Alerts and Pubmed, biorXiv, arXiv, PeerJ Preprints, (...) RSS feeds to IFTTT</code></li>
+<li><code>IFTTT to [IFTTNode](https://github.com/sebauer/if-this-then-node)</code></li>
+<li><code>IFTTN to dat</code></li>
+<li><code>dat to S3 blob</code> (<em>binary large object</em> i.e. a file on an AWS server)</li>
+<li><code>S3 blob file change to AWS Lambda trigger</code></li>
+<li><code>AWS Lambda to [AWS Lambda function containing] self-contained GScholar Alerts bot R script(s)</code></li>
+<li>‘scale’ up as many bots as you like</li>
+<li>for example Wnt pathway bot, component bots could retweet to avoid duplication and pose interesting links for extended reading
+<ul>
+<li>e.g. β-catenin noted in abstract of a paper ∴ marked as Wnt pathway paper ∴ tweeted by Wnt pathway account, RT from β-catenin account</li>
+</ul></li>
+</ul>
+<hr />
+<p>Obviously potential for more subtle setup - must be useful, not spam, a fun new mode of interaction with the literature. Time limitations against course work, though such a biological network management tool could easily find application away from this toy problem.</p>
+<p><code>TBC</code></p>
 <ul>
 <li><a href="http://blog.jeffdouglas.com/2015/01/29/aws-lambda-aka-node-js-meets-ifttt-as-a-service/">AWS Lambda AKA Node.js meets IFTTT as a service!</a> by Jeff Douglas</li>
 <li>Sebastian Bauer’s <a href="https://github.com/sebauer/if-this-then-node">If This Then Node</a> on GitHub</li>
@@ -284,24 +302,6 @@ AbbrevTitle(eg.title, max.compact = FALSE)
 <li><a href="http://rpubs.com/bradleyboehmke/data_wrangling">Data processing with dplyr and tidyr</a> by Brad Boehmke on RPubs</li>
 <li><a href="http://adv-r.had.co.nz/Exceptions-Debugging.html">Debugging, condition handling and defensive programming</a> in Hadley Wickham’s Advanced R</li>
 </ul>
-<div id="workflow-blueprint" class="section level4">
-<h4><strong>Workflow blueprint</strong></h4>
-<ul>
-<li><code>Gmail Scholar Alerts and Pubmed, biorXiv, arXiv, PeerJ Preprints, (...) RSS feeds to IFTTT</code></li>
-<li><code>IFTTT to [IFTTNode](https://github.com/sebauer/if-this-then-node)</code></li>
-<li><code>IFTTN to dat</code></li>
-<li><code>dat to S3 blob</code> (<em>binary large object</em> i.e. a file on an AWS server)</li>
-<li><code>S3 blob file change to AWS Lambda trigger</code></li>
-<li><code>AWS Lambda to [AWS Lambda function containing] self-contained GScholar Alerts bot R script(s)</code></li>
-<li>‘scale’ up as many bots as you like</li>
-<li>for example Wnt pathway bot, component bots could retweet to avoid duplication and pose interesting links for extended reading
-<ul>
-<li>e.g. β-catenin noted in abstract of a paper ∴ marked as Wnt pathway paper ∴ tweeted by Wnt pathway account, RT from β-catenin account</li>
-</ul></li>
-</ul>
-<hr />
-<p>Obviously potential for more subtle setup - must be useful, not spam, a fun new mode of interaction with the literature. Time limitations against course work, though such a biological network management tool could easily find application away from this toy problem.</p>
-<p><code>TBC</code></p>
 </div>
 </div>
 </div>
