@@ -261,46 +261,4 @@ crontab -l
 
 Cron automation makes sense for daily MEDLINE (PubMed) updates, but not for emails - IFTTT-like 'triggering' would be ideal, and can be achieved with custom 'events' through the Amazon Lambda service, running on the EC2 cloud platform.
 
-#### **Workflow blueprint**
-
-* `Gmail Scholar Alerts and Pubmed, biorXiv, arXiv, PeerJ Preprints, (...) RSS feeds to IFTTT`
-* `IFTTT to [IFTTNode](https://github.com/sebauer/if-this-then-node)`
-* `IFTTN to dat`
-* `dat to S3 blob` (*binary large object* i.e. a file on an AWS server)
-* `S3 blob file change to AWS Lambda trigger`
-* `AWS Lambda to [AWS Lambda function containing] self-contained GScholar Alerts bot R script(s)`
-  * 'scale' up as many bots as you like
-  * for example Wnt pathway bot, component bots could retweet to avoid duplication and pose interesting links for extended reading
-    * e.g. β-catenin noted in abstract of a paper ∴ marked as Wnt pathway paper ∴ tweeted by Wnt pathway account, RT from β-catenin account
-
----
-
-Obviously potential for more subtle setup - must be useful, not spam, a fun new mode of interaction with the literature. Time limitations against course work, though such a biological network management tool could easily find application away from this toy problem.
-
-<code>TBC</code>
-
-* [AWS Lambda AKA Node.js meets IFTTT as a service!](http://blog.jeffdouglas.com/2015/01/29/aws-lambda-aka-node-js-meets-ifttt-as-a-service/) by Jeff Douglas
-  * Sebastian Bauer's [If This Then Node](https://github.com/sebauer/if-this-then-node) on GitHub
-  * William Casarin's [s3-blob-store](https://github.com/jb55/s3-blob-store)
-  * [dat project](http://dat-data.com/)
-* [Why AWS Lambda is a Masterstroke from Amazon](http://research.gigaom.com/2015/01/why-aws-lambda-is-a-masterstroke-from-amazon/) by Janakiram MSV
-* [AWS Lambda Will Help Create a New Normal](http://thenewstack.io/aws-lambda-is-a-step-towards-creating-a-new-normal/) by Vivek Juneja
-* [Max Ogden's dat talk at UK Gov. Digital Service](https://www.youtube.com/watch?v=9n8sGD4Qncs) (40 mins) and [slides](http://maxogden.github.io/slides/dat-intro-talk)
-* [*afterthought-lit*](https://github.com/lmmx/draftposts/blob/master/afterthought-lit.md)
-* [Create a Lambda function](https://us-west-2.console.aws.amazon.com/lambda/home?region=us-west-2#/create) (AWS)
-* Execution time must be [60 seconds max.](http://stackoverflow.com/a/27644777/2668831)
-
-See also:
-
-* [Human Protein Tweetbots](jasonya.com/wp/human-protein-tweetbots/) by Jason McDermott
-* [HN comments on AWS λ](https://news.ycombinator.com/item?id=8602936#up_8604162)
-  * [Apache libcloud](https://libcloud.apache.org/), [StackStorm](stackstorm.com/2014/11/20/stackstorm-vs-aws-lambda-event-driven-computing-vs-event-driven-operations/)
-* <strike>[Receive emails on Amazon EC2 server](http://serverfault.com/questions/386210/receive-emails-on-amazon-ec2-server) on ServerFault</strike>
-* [Providence: Failure is always an option](http://jasonpunyon.com/blog/2015/02/12/providence-failure-is-always-an-option/) - a cautionary tale on 'speculative technology decisions'
-* Ensembl: [eHive: An Artificial Intelligence workflow system for genomic analysis](http://www.biomedcentral.com/1471-2105/11/240)
-* Unrelated: [Completely serverless dynamic websites with AWS λ](https://twitter.com/akelman/status/566424428129447937)
-
-Doing more with R:
-
-* [Data processing with dplyr and tidyr](http://rpubs.com/bradleyboehmke/data_wrangling) by Brad Boehmke on RPubs
-* [Debugging, condition handling and defensive programming](http://adv-r.had.co.nz/Exceptions-Debugging.html) in Hadley Wickham's Advanced R
+* Wiki: [Proposed workflow with AWS and dat](https://github.com/lmmx/ScholarDaemon/wiki/Draft-workflow-with-AWS-and-dat)
