@@ -1,8 +1,8 @@
-library('gmailr')
-library('twitteR') #NB the version with modified statuses.R, https://github.com/lmmx/twitteR
-library('RJSONIO')
-library('base64enc')
-library('XML')
+library('gmailr', warn.conflicts = F)
+library('twitteR', warn.conflicts = F) #NB the version with modified statuses.R, https://github.com/lmmx/twitteR
+library('RJSONIO', warn.conflicts = F)
+library('base64enc', warn.conflicts = F)
+library('XML', warn.conflicts = F)
 
 # Authorise Gmail
 gmail_auth('gmail_authfile.json')
@@ -300,6 +300,7 @@ AbbrevTitle <- function(start.str, known.url = NULL, use.abbreviations = T, max.
 }
 
 WriteTweet <- function(article.summary) {
+#  browser()
   tweet.title <- AbbrevTitle(article.summary$title, known.url = article.summary$url)
   return(paste(c(tweet.title,article.summary$url),collapse=" "))
 }
@@ -337,10 +338,15 @@ GetMail <- function(search.query = sd.config[['gmail_query']]) {
 
 # Handling ID logs
 WriteNewIDs <- function(ids, log.filename = 'gmail_id_log.json', overwrite.log = F) {
-    json.string <- paste0('{"list_seen":[',paste(shQuote(recent.paper.mail.ids, type="cmd"), collapse=", "),']}')
-    log.file <- file(log.filename)
-    write(json.string, file = log.file, append = !overwrite.log)
-    close(log.file)
+  if (exists('debug.mode')) return(NULL) # Don't mark papers as tweeted if you're just checking them
+  suff <- if (length(ids) > 1) 's' else NULL
+  cat(paste0('Writing new id',suff),':',paste0(ids, collapse=", "),'\n')
+  
+  seen.ids <- fromJSON(log.filename)$list_seen
+  json.string <- paste0('{"list_seen":[',paste(shQuote(c(ids,seen.ids), type="cmd"), collapse=", "),']}')
+  log.file <- file(log.filename)
+  write(json.string, file = log.file, append = !overwrite.log)
+  close(log.file)
 }
 
 CheckMessageHistory <- function(ids, log.filename = 'gmail_id_log.json', overwrite.log = F) {
@@ -352,38 +358,50 @@ CheckMessageHistory <- function(ids, log.filename = 'gmail_id_log.json', overwri
     past.ids <- fromJSON(log.filename)$list_seen
     new.ids <- ids[!ids %in% past.ids]
     if (length(new.ids) == 0) {
-      cat('\nNo new papers')
+      cat('\nNo new papers\n')
     } else {
-      WriteNewIDs(new.ids)
+#      cat('Found ', ,'new papers.\n')
+      WriteNewIDs(new.ids) # should really do this after sending the tweets in case of error
       # then whip up some tweets
       new.summaries <- sapply(new.ids, ReadMail)
-      new.tweets <- as.vector(unlist(lapply(new.summaries, function(message) {sapply(message, WriteTweet)})))
-
+      if (length(new.ids) == 1) {
+        new.tweets <- as.vector(unlist(lapply(new.summaries, WriteTweet)))
+      } else { # Multiple messages - recurse across them, into a single list
+        new.tweets <- as.vector(unlist(lapply(new.summaries, function(summaries) {
+          as.vector(unlist(lapply(summaries, WriteTweet)))
+          })))
+      }
+      
       # Send to Twitter API
-      for (new.tweet in new.tweets) {
-        updateStatus(new.tweet, bypassCharLimit = T)
+      print(new.tweets)
+      if (exists('debug.mode')) {
+        cat("\nNo tweets sent\n")
+        return
+      } else {
+        for (new.tweet in new.tweets) {
+          updateStatus(new.tweet, bypassCharLimit = T)
+        }
       }
     }
   }
 }
 
-CheckAlerts <- function(confirm = F) {
+CheckMail <- function(confirm = F) {
   if (confirm) {
-    cat('\nTweet papers now? Hit enter to confirm, or any other key to cancel:\n')
+    cat('\nCheck for papers now? Hit enter to confirm, or any other key to cancel:\n')
 			confirm.var <- readLines(n=1)
 			if (confirm.var != '') {
 			  confirm.var <- 'Scholar Alerts not checked'
-				return()
+				return(NA)
 			}
   }
   # Should add a preview...
-  recent.papers <- GetMail()
-  recent.paper.mail.ids <- names(recent.papers) # not actually paper names, just the message IDs
-  if (exists('debug.mode')) {print(recent.paper.mail.ids)} else { # switch for debugging, pass in a variable as arg
-    CheckMessageHistory(recent.paper.mail.ids)
-  }
+  return(GetMail())
 }
 
-cat(
-  CheckAlerts(confirm = !exists('no.confirm')) # set a variable no.confirm = T to skip tweet confirmation
-)
+recent.papers <- CheckMail(confirm = !exists('no.confirm')) # set a variable no.confirm = T to skip tweet confirmation
+
+if (all(!is.na(recent.papers))) { # the CheckMail function would return NA [once] if the user cancels mail checking
+  recent.paper.mail.ids <- names(recent.papers) # not actually paper names, just the message IDs
+  CheckMessageHistory(recent.paper.mail.ids)
+}

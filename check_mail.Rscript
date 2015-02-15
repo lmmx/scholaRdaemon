@@ -10,25 +10,28 @@ args <- commandArgs(TRUE)
 
 # Better to do the above systematically with some sort of [potentially degenerate] list data structure holding outcomes of flags
 
-flag.details <- list("debug" = list(def = "Print message IDs rather than sending them through the tweet making process", flag = "--debug", output = "debug.mode <- T"),
-                          "help" = list(def = "Display flag definitions", flag = c("-h","--help"), output = "cat(help.prompt); quit();")
-                           )
+if (length(args) > 0) {
+  flag.details <- list("debug" = list(def = "Print message IDs rather than sending them through the tweet making process", flag = "--debug", output = "debug.mode <- T"),
+                            "help" = list(def = "Display flag definitions", flag = c("-h","--help"), output = "cat(help.prompt); quit();")
+                             )
+  
+  flag.conditions <- lapply(flag.details, function(x) {paste0(paste0('"',x$flag,'"'), sep = " %in% args", collapse = " || ")})
+  flag.truth.table <- unlist(lapply(flag.conditions, function(x) {
+    if (eval(parse(text = x))) {
+      return(T)
+    } else return(F)
+  }))
+  
+  help.prompts <- lapply(names(flag.truth.table), function(x){ # joins 2-space-separatated flags with a tab-space to the flag description
+                                                    paste0(c(paste0(flag.details[x][[1]][['flag']], collapse="  "),
+                                                                    flag.details[x][[1]][['def']]), collapse="\t")  } )
+  help.prompt <- paste(c(unlist(help.prompts),''),collapse="\n\n")
+  
+  # The following lines handle the flags, running the corresponding 'output' entry in flag.details for any supplied
+  flag.output <- unlist(lapply(names(flag.truth.table), function(x){if (flag.truth.table[x]) return(flag.details[x][[1]][['output']])}))
+  eval(parse(text = flag.output))
 
-flag.conditions <- lapply(flag.details, function(x) {paste0(paste0('"',x$flag,'"'), sep = " %in% args", collapse = " || ")})
-flag.truth.table <- unlist(lapply(flag.conditions, function(x) {
-  if (eval(parse(text = x))) {
-    return(T)
-  } else return(F)
-}))
-
-help.prompts <- lapply(names(flag.truth.table), function(x){ # joins 2-space-separatated flags with a tab-space to the flag description
-                                                  paste0(c(paste0(flag.details[x][[1]][['flag']], collapse="  "),
-                                                                  flag.details[x][[1]][['def']]), collapse="\t")  } )
-help.prompt <- paste(c(unlist(help.prompts),''),collapse="\n\n")
-
-# The following lines handle the flags, running the corresponding 'output' entry in flag.details for any supplied
-flag.output <- unlist(lapply(names(flag.truth.table), function(x){if (flag.truth.table[x]) return(flag.details[x][[1]][['output']])}))
-eval(parse(text = flag.output))
+}
 
 GoToSDdir <- function(bypass.sys.check = F) {
   RDirCheck <- function() {
@@ -61,7 +64,7 @@ GoToSDdir <- function(bypass.sys.check = F) {
 
 if (!file.exists('ScholarDaemon.R')) {
   found.daemon <- GoToSDdir()
-  if (is.na(find.daemon)) {
+  if (is.na(found.daemon)) {
     stop("Unable to find daemon. Please put it in the same directory as this script, as in the GitHub repo at https://github.com/lmmx/ScholarDaemon")
   }
 } else found.daemon <- file.path('ScholarDaemon.R')
