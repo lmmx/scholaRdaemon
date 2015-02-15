@@ -79,7 +79,7 @@ The `gmailr` package deals with message IDs and thread IDs, while to read an ema
 
 The complexity is solved with some functions I've written in the R script here, so just go ahead and source after reading these notes to go through the setup:
 
-<big><big><big>`source('ScholarDaemon.R')`</big></big></big>
+<big><big><big>`source('scholaRdaemon.R')`</big></big></big>
 
 The `twitteR` package the script will try to load should be downloaded off of my fork as (at present) the pull request to allow bypassing a hard-coded 140 characters (without taking URL shortening into account) hasn't been accepted into Geoff Jentry's original repo.
 
@@ -92,7 +92,7 @@ install_github("lmmx/twitteR")
 library('twitteR')
 ```
 
-Further details on what's going on in the `ScholarDaemon.R` script are below.
+Further details on what's going on in the `scholaRdaemon.R` script are below.
 
 ```r
 scholar.alerts <- messages('Scholar Alert')
@@ -108,7 +108,7 @@ eg.msg.resp.full <- message(eg.msg.id, format = "full")
 eg.msg.resp.full.data <- eg.msg.resp.full$payload$body$data
 ```
 
-The 'full' data of `eg.msg.resp.full.data` contains a comparable HTML 'payload' to 'raw' data, but the raw [RFC 2822](https://tools.ietf.org/html/rfc2822) format is less easily taken apart than JSON serialisation - there's [a brief note on this](https://github.com/lmmx/ScholarDaemon/wiki/Note-on-RFC-2822) over in the Wiki.
+The 'full' data of `eg.msg.resp.full.data` contains a comparable HTML 'payload' to 'raw' data, but the raw [RFC 2822](https://tools.ietf.org/html/rfc2822) format is less easily taken apart than JSON serialisation - there's [a brief note on this](https://github.com/lmmx/scholaRdaemon/wiki/Note-on-RFC-2822) over in the Wiki.
 
 ###2: Message parsing
 
@@ -169,7 +169,7 @@ Twitter's 140 character limit makes an exception for links, which are always cou
 
 For a domain-specific 'bot', I figured it makes sense to at least attempt to maximise the information provided through abbreviation. For example, "MicroRNA" to "miRNA", or for an intrinsically disordered protein feed, "IDP", *etc.*
 
-A function `AbbrevTitles` shortens repeatedly from a dictionary of common abbreviations (`abbrev.list`) until within the character limit, and this can be called across the list of titles with associated link URLs to generate tweets, as implemented in the `WriteTweet` function. The source code is pretty over-commented, [available online here](https://github.com/lmmx/ScholarDaemon/blob/master/ScholarDaemon.R).
+A function `AbbrevTitles` shortens repeatedly from a dictionary of common abbreviations (`abbrev.list`) until within the character limit, and this can be called across the list of titles with associated link URLs to generate tweets, as implemented in the `WriteTweet` function. The source code is pretty over-commented, [available online here](https://github.com/lmmx/scholaRdaemon/blob/master/scholaRdaemon.R).
 
 ```r
 abbrev.list <- list( microRNA = "miRNA",
@@ -242,7 +242,7 @@ Then authorise a new application in the [Twitter developer console](https://apps
 The default parameter for `authfile.name` is 'twitter_authfile.json', and after prompts the file is stored in the working directory.
 
 * `TwitterAuth()` wraps `setup_twitter_oauth` to authenticate using the same file (again a different file can be specified with the `authfile.name` parameter).
-* See the [wiki page for manual authenication details](https://github.com/lmmx/ScholarDaemon/wiki/Manual-authentication-details), but the R code `source`'d above should take care of things with the function `CreateTwitterAuthFile()`. I've tried to make the setup method fairly interactive.
+* See the [wiki page for manual authenication details](https://github.com/lmmx/scholaRdaemon/wiki/Manual-authentication-details), but the R code `source`'d above should take care of things with the function `CreateTwitterAuthFile()`. I've tried to make the setup method fairly interactive.
 * To write a tweet uses the `updateStatus()` function, modified to take [t.co URL shortening](https://dev.twitter.com/overview/t.co) into account with `abbrevTitles()` before passing a tweet to the API call.
 
 As well as the core `text` parameter which is all this script uses, a `mediaPath` can also be passed to `updateStatus`, so pictures such as graphical abstracts could potentially be supplied this way. You can also `searchTwitter`, `getUser`, `twListToDF`, `userTimeline`, `homeTimeline` - see the `twitteR` [vignette](http://geoffjentry.hexdump.org/twitteR.pdf) for full details.
@@ -261,4 +261,4 @@ crontab -l
 
 Cron automation makes sense for daily MEDLINE (PubMed) updates, but not for emails - IFTTT-like 'triggering' would be ideal, and can be achieved with custom 'events' through the Amazon Lambda service, running on the EC2 cloud platform.
 
-* Wiki: [Proposed workflow with AWS and dat](https://github.com/lmmx/ScholarDaemon/wiki/Draft-workflow-with-AWS-and-dat)
+* Wiki: [Proposed workflow with AWS and dat](https://github.com/lmmx/scholaRdaemon/wiki/Draft-workflow-with-AWS-and-dat)
