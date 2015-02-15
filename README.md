@@ -249,7 +249,7 @@ As well as the core `text` parameter which is all this script uses, a `mediaPath
 
 ### Automation
 
-A working script to run the automation (not setup) of tweet generation is in `check_mail.Rscript`. Run it with `Rscript check_mail.Rscript` command from a shell, with `--help` to see the available flags.
+A working script to run the automation (not setup) of tweet generation is in `run_daemon.Rscript`. Run it with `Rscript run_daemon.Rscript` command from a shell, with `--help` to see the available flags.
 
 Dave Tang seems to have [beaten me to the idea of using R for a paper bot](http://davetang.org/muse/2015/01/31/transcriptome-feed-using-r/) by just a couple of weeks - he has a working example of a cron script, timed for Pubmed's release, as he worked with eUtils (i.e. Pubmed, like all the other existing bots in Casey Bergman's list, with the exception of [eQTLpapers](https://twitter.com/eQTL_papers) which has Scholar Alerts added manually by [Sarah Brown](https://twitter.com/sarahfbrooks)).
 
