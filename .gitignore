@@ -1,5 +1,4 @@
 .httr-oauth
 *.json
-config/*
 .Rproj.user
 .Rhistory
