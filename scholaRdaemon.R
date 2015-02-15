@@ -35,7 +35,7 @@ ReadNewVar <- function(prompt, new.var, onError = function(){return('')}, env = 
 }
 
 CreateTwitterAuthfile <- function(authfile.name = 'twitter_authfile.json') {
-  abortAuth <- function() { stop("Re-run CreateTwitterAuthFile() when you have both API and token keys and secrets. Instructions on how to do so are available in the README at https://github.com/lmmx/ScholarDaemon") }
+  abortAuth <- function() { stop("Re-run CreateTwitterAuthFile() when you have both API and token keys and secrets. Instructions on how to do so are available in the README at https://github.com/lmmx/scholaRdaemon") }
   cat('You need to set up Twitter authorisation at https://apps.twitter.com - enter your access credentials below (hit enter to abort)\n')
   #  ReadNewVar('API key','api_key_entered', onError = abortAuth())
   #  ReadNewVar('API secret','api_secret_entered', onError = abortAuth())
@@ -65,9 +65,9 @@ CreateTwitterAuthfile <- function(authfile.name = 'twitter_authfile.json') {
   cat('\nCredentials stored in',authfile.name)
 }
 
-ScholarDaemonConfig <- function(config.filename = 'sd_config.json') {
+scholaRdaemonConfig <- function(config.filename = 'sd_config.json') {
   cat('Enter the default query your Google Scholar Alerts are set up for (will be used to find new results)\n')
-  abortSDConfig <- function() { stop("Re-run ScholarDaemonConfig() to set up default settings.") }
+  abortSDConfig <- function() { stop("Re-run scholaRdaemonConfig() to set up default settings.") }
   
   lapply(c('Gmail search term'),
          function(user.message) {
@@ -93,7 +93,7 @@ ReadSDConfig <- function() { return(fromJSON('sd_config.json')$info) }
 
 if (file.exists('sd_config.json') && !exists('sd.config')){
   sd.config <- ReadSDConfig()
-} else ScholarDaemonConfig()
+} else scholaRdaemonConfig()
 
 # Create a Twitter authorisation file if one doesn't exist
 # NB will ignore any alternatively named JSON
@@ -322,7 +322,7 @@ ReadMail <- function(mail.id) {
 GetMail <- function(search.query = sd.config[['gmail_query']]) {
   if (!exists('sd.config') && missing('search.query')) {
     cat('Set up a default search query')
-    ScholarDaemonConfig()
+    scholaRdaemonConfig()
     sd.config <- ReadSDConfig()
 
     if (exists('sd.config')) {
