@@ -90,7 +90,11 @@ img {
 <ul>
 <li>Install gmailr and twitteR, set up apps on <a href="https://developers.google.com/console/">Google Dev console</a> and likewise for <a href="https://apps.twitter.com/">Twitter’s</a></li>
 <li>Authorise gmailr (<code>gmail_auth</code>) with the JSON obtained by setting up an app</li>
-<li>Run <code>Rscript run_daemon</code> with <code>--help</code> to just show the available flags. Bots can be passed as arguments to <code>run_daemon</code> indicating which of the bots’ configs to use, default behaviour being to check and tweet for all sequentially if unspecified.</li>
+<li>Run <code>Rscript run_daemon</code> with <code>--help</code> to show available flags and bots.
+<ul>
+<li>Bots can be passed as arguments to <code>run_daemon</code> indicating which of the available account configurations to use, default behaviour being to check and tweet for all sequentially if unspecified.</li>
+<li>These arguments are specified under <code>config/bot_registry.json</code>, where they are stored alongside the corresponding sub-directories to retrieve authentication information from. See the <a href="https://github.com/lmmx/scholaRdaemon/wiki/Running-multiple-bots">Wiki</a> for more info.</li>
+</ul></li>
 </ul>
 </div>
 <div id="automation" class="section level3">
