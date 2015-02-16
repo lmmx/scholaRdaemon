@@ -28,13 +28,7 @@ For a walkthrough on installation see the [Wiki homepage](https://github.com/lmm
 
 * Install gmailr and twitteR, set up apps on [Google Dev console](https://developers.google.com/console/) and likewise for [Twitter's](https://apps.twitter.com/)
 * Authorise gmailr (`gmail_auth`) with the JSON obtained by setting up an app
-* Run `Rscript run_daemon` with `--help` to just show the available flags.
-  * The next iteration of scholaRdaemon will take arguments to `run_daemon` indicating which of the bots' configs to use, default behaviour being to check and tweet for all bot accounts if unspecified.
-
-**NB** Because this repo is under reorganisation for multiple bots, the current version will not work. For a working version use [this commit](https://github.com/lmmx/scholaRdaemon/commit/da2d16d9cb3678cdac2b7837de74c53931060701):
-
-* `git fetch origin da2d16d9cb3678cdac2b7837de74c53931060701`
-* `git reset --hard FETCH_HEAD`
+* Run `Rscript run_daemon` with `--help` to just show the available flags. Bots can be passed as arguments to `run_daemon` indicating which of the bots' configs to use, default behaviour being to check and tweet for all sequentially if unspecified.
 
 ### Automation
 

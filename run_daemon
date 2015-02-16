@@ -1,5 +1,7 @@
 #!/usr/bin/Rscript
 
+library('RJSONIO', warn.conflicts = F)
+
 # Add an environment variable 'scholaRdaemon' to .bashrc
 # else search for it in user home directory
 
@@ -10,54 +12,9 @@ args <- commandArgs(TRUE)
 
 # Better to do the above systematically with some sort of [potentially degenerate] list data structure holding outcomes of flags
 
-# To set up:
-# bot.flags <- c('idp' = 'IDP_papers', 'babu-lab' = 'Babu_lab_citations', 'mirna-xpr' = 'miRNA_xpr_papers')
-# For now:
-bot.flags <- c('idp' = 'IDP_papers')
-# also ideally this wouldn't even be hard-coded! Read from top-level JSON
 
-bot.codes <- names(bot.flags)
+#     W h e r e      i s       t h e       d a e m o n     ?
 
-if (length(args) > 0) {
-  flag.details <- list("debug" = list(def = "Print message IDs rather than sending them through the tweet making process", flag = "--debug", output = "debug.mode <- T"),
-                            "help" = list(def = "Display flag definitions", flag = c("-h","--help"), output = "cat(help.prompt); quit();")
-                             )
-  
-  flag.conditions <- lapply(flag.details, function(x) {paste0(paste0('"',x$flag,'"'), sep = " %in% args", collapse = " || ")})
-  flag.truth.table <- unlist(lapply(flag.conditions, function(x) {
-    if (eval(parse(text = x))) {
-      return(T)
-    } else return(F)
-  }))
-  
-  help.prompts <- lapply(names(flag.truth.table), function(x){ # joins 2-space-separatated flags with a tab-space to the flag description
-                                                    paste0(c(paste0(flag.details[x][[1]][['flag']], collapse="  "),
-                                                                    flag.details[x][[1]][['def']]), collapse="\t")  } )
-  help.prompt <- paste(c(unlist(help.prompts),''),collapse="\n\n")
-  
-  # The following lines handle the flags, running the corresponding 'output' entry in flag.details for any supplied
-  flag.output <- unlist(lapply(names(flag.truth.table), function(x){if (flag.truth.table[x]) return(flag.details[x][[1]][['output']])}))
-  if (!is.null(flag.output)) eval(parse(text = flag.output))
-
-  all.flags <- c(as.vector(unlist(lapply(flag.details, function(x) x[['flag']]))),
-                 as.vector(names(bot.flags)))
-  bad.args <- args[!args %in% all.flags]
-  if (length(bad.args) == 1) {
-    warning(paste0("No known argument '",bad.args,"'"))
-  } else if (length(bad.args > 1)) {
-    bad.arg.list <- paste(shQuote(bad.args[seq(1, length(bad.args) - 1)], type="csh"), collapse=", ")
-    warning(paste0("No known arguments ",bad.arg.list,", or '",bad.args[length(bad.args)],"'"))
-  }
-
-  if (!all(!names(bot.flags) %in% args)) { # If no bot flag is specified in the arguments passed to run_daemon, use all bots
-    bots <- bot.flags[[bot.codes[bot.codes %in% args]]]
-  } else if (length(args) == length(bad.args)) { # if bots may have been mistyped, don't run all bots!
-    stop("No proper arguments used, so no bots were run as a precaution.")
-  } else {
-    bots <- as.vector(bot.flags)
-  }
-  # if all bots' flags are not missing (i.e. if at least 1 bot was specified) then declare bots, else assume use all bots
-} else bots <- as.vector(bot.flags) # use all bots if none are specified, storing Twitter handles as character vector
 
 GoToSDdir <- function(bypass.sys.check = F) {
   RDirCheck <- function() {
@@ -101,6 +58,70 @@ daemon.dir <- gsub('scholaRdaemon.R$','',full.daemon.path) # The 'R/' directory
 top.dir <- gsub('/R/','/',daemon.dir)
 top.config.dir <- paste0(top.dir,'config/')
 
+
+#    W h a t        a r e       t h e       b o t s       c a l l e d       ?
+
+# Not hard-coded, read bots' names from top-level JSON (hence needed to locate directory first)
+
+bot.registry <- file.path(paste0(top.config.dir,'bot_registry.json'))
+if (file.exists(bot.registry)) {
+  bot.codes <- fromJSON(bot.registry)$bots
+} else {
+  stop('Missing file "bot_registry.json". Please create it in the config sub-directory below the main scholaRdaemon directory, as in the GitHub repo at https://github.com/lmmx/scholaRdaemon\n\nJSON should look like\n\n{"bots":{"flag":"Twitter_handle"}}\n\nwhere "flag"" is the optional flag to be passed to run_daemon and "Twitter_handle" is the account to be tweet papers from (must be the same as the Twitter handle). Multiple comma-separated entries can be specified, e.g.\n\n{"bots":{"flag1":"Bot_1", "flag2":"Bot_2"}}')
+}
+
+bot.flags <- names(bot.codes)
+
+if (length(args) > 0) {
+  flag.details <- list("debug" = list(def = "Print message IDs rather than sending them through the tweet making process", flag = "--debug", output = "debug.mode <- T"),
+                            "help" = list(def = "Display flag definitions", flag = c("-h","--help"), output = "cat(help.prompt); quit();")
+                             )
+  
+  flag.conditions <- lapply(flag.details, function(x) {paste0(paste0('"',x$flag,'"'), sep = " %in% args", collapse = " || ")})
+  flag.truth.table <- unlist(lapply(flag.conditions, function(x) {
+    if (eval(parse(text = x))) {
+      return(T)
+    } else return(F)
+  }))
+  
+  flag.prompts <- lapply(names(flag.truth.table), function(x){ # joins 2-space-separatated flags with a tab-space to the flag description
+                                                    paste0(c(paste0(flag.details[x][[1]][['flag']], collapse="  "),
+                                                                    flag.details[x][[1]][['def']]), collapse="\t")  } )
+  bot.prompts <- lapply(bot.flags, function(x){ # joins 2-space-separatated flags with a tab-space to the flag description
+    paste0(c(x, paste0('@',bot.codes[[x]])), collapse="\t")  } )
+  help.prompt <- paste(c('Flags\n-----', 
+                         unlist(flag.prompts),
+                         'Available bots [codes can be given as arguments rather than checking all accounts]\n-----------------------------------------------------------------------------',
+                         unlist(bot.prompts)),collapse="\n\n")
+  
+  # The following lines handle the flags, running the corresponding 'output' entry in flag.details for any supplied
+  flag.output <- unlist(lapply(names(flag.truth.table), function(x){if (flag.truth.table[x]) return(flag.details[x][[1]][['output']])}))
+  if (!is.null(flag.output)) eval(parse(text = flag.output))
+
+  all.flags <- c(as.vector(unlist(lapply(flag.details, function(x) x[['flag']]))),
+                 as.vector(names(bot.codes)))
+  bad.args <- args[!args %in% all.flags]
+  if (length(bad.args) == 1) {
+    warning(paste0("No known argument '",bad.args,"'"))
+  } else if (length(bad.args > 1)) {
+    bad.arg.list <- paste(shQuote(bad.args[seq(1, length(bad.args) - 1)], type="csh"), collapse=", ")
+    warning(paste0("No known arguments ",bad.arg.list,", or '",bad.args[length(bad.args)],"'"))
+  }
+
+  if (!all(!names(bot.codes) %in% args)) { # If no bot flag is specified in the arguments passed to run_daemon, use all bots
+    bots <- bot.codes[[bot.flags[bot.flags %in% args]]]
+  } else if (length(args) == length(bad.args)) { # if bots may have been mistyped, don't run all bots!
+    stop("No proper arguments used, so no bots were run as a precaution.")
+  } else {
+    bots <- as.vector(bot.codes)
+  }
+  # if all bots' flags are not missing (i.e. if at least 1 bot was specified) then declare bots, else assume use all bots
+} else bots <- as.vector(bot.codes) # use all bots if none are specified, storing Twitter handles as character vector
+
+
+#     R u n       t h e      b o t s
+
+
 no.confirm <- T
 
 for (bot in bots) {
@@ -109,6 +130,7 @@ for (bot in bots) {
     setwd(bot.config.dir)
     # move into a config sub-directory to get authentication info specific to one bot
     source(full.daemon.path)
+    setwd(top.dir) # not strictly necessary, and full paths are being used, but may avoid awkward complications if errors occur
   } else {
     warning(paste0("Skipping bot '",bot,"': config files not found. Please put them in a config/",bot," below the main scholaRdaemon directory, as in the GitHub repo at https://github.com/lmmx/scholaRdaemon"))
   }

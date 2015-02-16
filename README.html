@@ -90,13 +90,7 @@ img {
 <ul>
 <li>Install gmailr and twitteR, set up apps on <a href="https://developers.google.com/console/">Google Dev console</a> and likewise for <a href="https://apps.twitter.com/">Twitter’s</a></li>
 <li>Authorise gmailr (<code>gmail_auth</code>) with the JSON obtained by setting up an app</li>
-<li>Run <code>Rscript run_daemon</code> with <code>--help</code> to just show the available flags.</li>
-<li>The next iteration of scholaRdaemon will take arguments to <code>run_daemon</code> indicating which of the bots’ configs to use, default behaviour being to check and tweet for all bot accounts if unspecified.</li>
-</ul>
-<p><strong>NB</strong> Because this repo is under reorganisation for multiple bots, the current version will not work. For a working version use <a href="https://github.com/lmmx/scholaRdaemon/commit/da2d16d9cb3678cdac2b7837de74c53931060701">this commit</a>:</p>
-<ul>
-<li><code>git fetch origin da2d16d9cb3678cdac2b7837de74c53931060701</code></li>
-<li><code>git reset --hard FETCH_HEAD</code></li>
+<li>Run <code>Rscript run_daemon</code> with <code>--help</code> to just show the available flags. Bots can be passed as arguments to <code>run_daemon</code> indicating which of the bots’ configs to use, default behaviour being to check and tweet for all sequentially if unspecified.</li>
 </ul>
 </div>
 <div id="automation" class="section level3">
