@@ -10,6 +10,14 @@ args <- commandArgs(TRUE)
 
 # Better to do the above systematically with some sort of [potentially degenerate] list data structure holding outcomes of flags
 
+# To set up:
+# bot.flags <- c('idp' = 'IDP_papers', 'babu-lab' = 'Babu_lab_citations', 'mirna-xpr' = 'miRNA_xpr_papers')
+# For now:
+bot.flags <- c('idp' = 'IDP_papers')
+# also ideally this wouldn't even be hard-coded! Read from top-level JSON
+
+bot.codes <- names(bot.flags)
+
 if (length(args) > 0) {
   flag.details <- list("debug" = list(def = "Print message IDs rather than sending them through the tweet making process", flag = "--debug", output = "debug.mode <- T"),
                             "help" = list(def = "Display flag definitions", flag = c("-h","--help"), output = "cat(help.prompt); quit();")
@@ -29,22 +37,40 @@ if (length(args) > 0) {
   
   # The following lines handle the flags, running the corresponding 'output' entry in flag.details for any supplied
   flag.output <- unlist(lapply(names(flag.truth.table), function(x){if (flag.truth.table[x]) return(flag.details[x][[1]][['output']])}))
-  eval(parse(text = flag.output))
+  if (!is.null(flag.output)) eval(parse(text = flag.output))
 
-}
+  all.flags <- c(as.vector(unlist(lapply(flag.details, function(x) x[['flag']]))),
+                 as.vector(names(bot.flags)))
+  bad.args <- args[!args %in% all.flags]
+  if (length(bad.args) == 1) {
+    warning(paste0("No known argument '",bad.args,"'"))
+  } else if (length(bad.args > 1)) {
+    bad.arg.list <- paste(shQuote(bad.args[seq(1, length(bad.args) - 1)], type="csh"), collapse=", ")
+    warning(paste0("No known arguments ",bad.arg.list,", or '",bad.args[length(bad.args)],"'"))
+  }
+
+  if (!all(!names(bot.flags) %in% args)) { # If no bot flag is specified in the arguments passed to run_daemon, use all bots
+    bots <- bot.flags[[bot.codes[bot.codes %in% args]]]
+  } else if (length(args) == length(bad.args)) { # if bots may have been mistyped, don't run all bots!
+    stop("No proper arguments used, so no bots were run as a precaution.")
+  } else {
+    bots <- as.vector(bot.flags)
+  }
+  # if all bots' flags are not missing (i.e. if at least 1 bot was specified) then declare bots, else assume use all bots
+} else bots <- as.vector(bot.flags) # use all bots if none are specified, storing Twitter handles as character vector
 
 GoToSDdir <- function(bypass.sys.check = F) {
   RDirCheck <- function() {
     posswds <- list.files(Sys.getenv("HOME"), pattern = '.*scholaRdaemon$', include.dirs = T, recursive = T)
     if (length(posswds) > 0) {
       for (posswd in posswds) {
-          posswd.files <- list.files(path = path.expand(paste0("~/",posswd)))
+          posswd.files <- list.files(path = path.expand(paste0("~/",posswd,"/R")))
           if ('scholaRdaemon.R' %in% posswd.files) {
           setwd(posswd)
-            return(file.path('scholaRdaemon.R'))
+            return(file.path('R/scholaRdaemon.R'))
           }
         }
-        if (!grepl("S/scholaRdaemon$", getwd())) return(NA)
+        if (!grepl("/scholaRdaemon$", getwd())) return(NA) else return(file.path('R/scholaRdaemon.R'))
       }
       return(NA)
   }
@@ -52,22 +78,38 @@ GoToSDdir <- function(bypass.sys.check = F) {
   if (!grepl("/scholaRdaemon$",getwd()) && !bypass.sys.check) {
     if (Sys.getenv('scholaRdaemon') != '') {
       setwd(Sys.getenv('scholaRdaemon'))
-      return(file.path('scholaRdaemon.R'))
+      return(file.path('R/scholaRdaemon.R'))
     } else {
       return(RDirCheck())
     }
   } else if (bypass.sys.check) {RDirCheck()} else {
-    return(file.path('scholaRdaemon.R'))
+    return(file.path('R/scholaRdaemon.R'))
   }
   # should pretty definitely know where the daemon is now and be in its directory
 }
 
-if (!file.exists('scholaRdaemon.R')) {
+if (!file.exists('R/scholaRdaemon.R')) {
   found.daemon <- GoToSDdir()
   if (is.na(found.daemon)) {
-    stop("Unable to find daemon. Please put it in the same directory as this script, as in the GitHub repo at https://github.com/lmmx/scholaRdaemon")
+    stop("Unable to find daemon. Please put it in the R sub-directory below the main scholaRdaemon directory, as in the GitHub repo at https://github.com/lmmx/scholaRdaemon")
   }
-} else found.daemon <- file.path('scholaRdaemon.R')
+} else found.daemon <- file.path('R/scholaRdaemon.R')
+
+# note to self: use Konrad Rudolph 'modules' package
+full.daemon.path <- normalizePath(found.daemon)
+daemon.dir <- gsub('scholaRdaemon.R$','',full.daemon.path) # The 'R/' directory
+top.dir <- gsub('/R/','/',daemon.dir)
+top.config.dir <- paste0(top.dir,'config/')
 
 no.confirm <- T
-source(found.daemon)
+
+for (bot in bots) {
+  bot.config.dir <- file.path(paste0(top.config.dir,bot))
+  if (file.exists(bot.config.dir)) {
+    setwd(bot.config.dir)
+    # move into a config sub-directory to get authentication info specific to one bot
+    source(full.daemon.path)
+  } else {
+    warning(paste0("Skipping bot '",bot,"': config files not found. Please put them in a config/",bot," below the main scholaRdaemon directory, as in the GitHub repo at https://github.com/lmmx/scholaRdaemon"))
+  }
+}
