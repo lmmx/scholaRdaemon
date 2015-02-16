@@ -24,7 +24,6 @@ This script checks for Google Scholar Alerts in a Gmail account, parses through 
 
 ### Installation and usage
 
-<<<<<<< HEAD
 For a walkthrough on installation see the [Wiki homepage](https://github.com/lmmx/scholaRdaemon/wiki). Briefly:
 
 * Install gmailr and twitteR, set up apps on [Google Dev console](https://developers.google.com/console/) and likewise for [Twitter's](https://apps.twitter.com/)
@@ -33,9 +32,6 @@ For a walkthrough on installation see the [Wiki homepage](https://github.com/lmm
   * The next iteration of scholaRdaemon will take arguments to run_daemon indicating which of the bots' configs to use, default behaviour being to check and tweet for all bot accounts if unspecified.
 
 **NB** Currently will not work, to get a working version use [this commit](https://github.com/lmmx/scholaRdaemon/commit/da2d16d9cb3678cdac2b7837de74c53931060701). Currently under reorganisation for multiple bots, each with separate configurations for Twitter and Gmail held under the config directory.
-=======
-For a walkthrough on installation see the [Wiki homepage](https://github.com/lmmx/scholaRdaemon/wiki).
->>>>>>> e89fcec506085d57c1f54c9da935c8d39908af1a
 
 ### Automation
 
