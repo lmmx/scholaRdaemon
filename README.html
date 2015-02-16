@@ -86,7 +86,14 @@ img {
 </div>
 <div id="installation-and-usage" class="section level3">
 <h3>Installation and usage</h3>
-<p>For a walkthrough on installation see the <a href="https://github.com/lmmx/scholaRdaemon/wiki">Wiki homepage</a>.</p>
+<p>For a walkthrough on installation see the <a href="https://github.com/lmmx/scholaRdaemon/wiki">Wiki homepage</a>. Briefly:</p>
+<ul>
+<li>Install gmailr and twitteR, set up apps on <a href="https://developers.google.com/console/">Google Dev console</a> and likewise for <a href="https://apps.twitter.com/">Twitter’s</a></li>
+<li>Authorise gmailr (<code>gmail_auth</code>) with the JSON obtained by setting up an app</li>
+<li>Run <code>Rscript run_daemon.Rscript</code></li>
+<li>The next iteration of scholaRdaemon will take arguments to run_daemon indicating which of the bots’ configs to use, default behaviour being to check and tweet for all bot accounts if unspecified.</li>
+</ul>
+<p><strong>NB</strong> Currently will not work, to get a working version use <a href="https://github.com/lmmx/scholaRdaemon/commit/da2d16d9cb3678cdac2b7837de74c53931060701">this commit</a>. Currently under reorganisation for multiple bots, each with separate configurations for Twitter and Gmail held under the config directory.</p>
 </div>
 <div id="automation" class="section level3">
 <h3>Automation</h3>
