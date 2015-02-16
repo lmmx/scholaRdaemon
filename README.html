@@ -90,14 +90,17 @@ img {
 <ul>
 <li>Install gmailr and twitteR, set up apps on <a href="https://developers.google.com/console/">Google Dev console</a> and likewise for <a href="https://apps.twitter.com/">Twitter’s</a></li>
 <li>Authorise gmailr (<code>gmail_auth</code>) with the JSON obtained by setting up an app</li>
-<li>Run <code>Rscript run_daemon.Rscript</code></li>
-<li>The next iteration of scholaRdaemon will take arguments to run_daemon indicating which of the bots’ configs to use, default behaviour being to check and tweet for all bot accounts if unspecified.</li>
+<li>Run <code>Rscript run_daemon</code> with <code>--help</code> to just show the available flags.</li>
+<li>The next iteration of scholaRdaemon will take arguments to <code>run_daemon</code> indicating which of the bots’ configs to use, default behaviour being to check and tweet for all bot accounts if unspecified.</li>
 </ul>
-<p><strong>NB</strong> Currently will not work, to get a working version use <a href="https://github.com/lmmx/scholaRdaemon/commit/da2d16d9cb3678cdac2b7837de74c53931060701">this commit</a>. Currently under reorganisation for multiple bots, each with separate configurations for Twitter and Gmail held under the config directory.</p>
+<p><strong>NB</strong> Because this repo is under reorganisation for multiple bots, the current version will not work. For a working version use <a href="https://github.com/lmmx/scholaRdaemon/commit/da2d16d9cb3678cdac2b7837de74c53931060701">this commit</a>:</p>
+<ul>
+<li><code>git fetch origin da2d16d9cb3678cdac2b7837de74c53931060701</code></li>
+<li><code>git reset --hard FETCH_HEAD</code></li>
+</ul>
 </div>
 <div id="automation" class="section level3">
 <h3>Automation</h3>
-<p>A working script to run the automation (not setup) of tweet generation is in <code>run_daemon.Rscript</code>. Run it with <code>Rscript run_daemon.Rscript</code> command from a shell, with <code>--help</code> to see the available flags.</p>
 <p>Dave Tang seems to have <a href="http://davetang.org/muse/2015/01/31/transcriptome-feed-using-r/">beaten me to the idea of using R for a paper bot</a> by just a couple of weeks - he has a working example of a cron script, timed for Pubmed’s release, as he worked with eUtils (i.e. Pubmed, like all the other existing bots in Casey Bergman’s list, with the exception of <a href="https://twitter.com/eQTL_papers">eQTLpapers</a> which has Scholar Alerts added manually by <a href="https://twitter.com/sarahfbrooks">Sarah Brown</a>).</p>
 <pre class="cron"><code>crontab -l
 #minute hour dom month dow user cmd

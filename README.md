@@ -28,14 +28,15 @@ For a walkthrough on installation see the [Wiki homepage](https://github.com/lmm
 
 * Install gmailr and twitteR, set up apps on [Google Dev console](https://developers.google.com/console/) and likewise for [Twitter's](https://apps.twitter.com/)
 * Authorise gmailr (`gmail_auth`) with the JSON obtained by setting up an app
-* Run `Rscript run_daemon.Rscript`
-  * The next iteration of scholaRdaemon will take arguments to run_daemon indicating which of the bots' configs to use, default behaviour being to check and tweet for all bot accounts if unspecified.
+* Run `Rscript run_daemon` with `--help` to just show the available flags.
+  * The next iteration of scholaRdaemon will take arguments to `run_daemon` indicating which of the bots' configs to use, default behaviour being to check and tweet for all bot accounts if unspecified.
 
-**NB** Currently will not work, to get a working version use [this commit](https://github.com/lmmx/scholaRdaemon/commit/da2d16d9cb3678cdac2b7837de74c53931060701). Currently under reorganisation for multiple bots, each with separate configurations for Twitter and Gmail held under the config directory.
+**NB** Because this repo is under reorganisation for multiple bots, the current version will not work. For a working version use [this commit](https://github.com/lmmx/scholaRdaemon/commit/da2d16d9cb3678cdac2b7837de74c53931060701):
+
+* `git fetch origin da2d16d9cb3678cdac2b7837de74c53931060701`
+* `git reset --hard FETCH_HEAD`
 
 ### Automation
-
-A working script to run the automation (not setup) of tweet generation is in `run_daemon.Rscript`. Run it with `Rscript run_daemon.Rscript` command from a shell, with `--help` to see the available flags.
 
 Dave Tang seems to have [beaten me to the idea of using R for a paper bot](http://davetang.org/muse/2015/01/31/transcriptome-feed-using-r/) by just a couple of weeks - he has a working example of a cron script, timed for Pubmed's release, as he worked with eUtils (i.e. Pubmed, like all the other existing bots in Casey Bergman's list, with the exception of [eQTLpapers](https://twitter.com/eQTL_papers) which has Scholar Alerts added manually by [Sarah Brown](https://twitter.com/sarahfbrooks)).
 
