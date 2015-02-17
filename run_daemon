@@ -129,6 +129,7 @@ for (bot in bots) {
   if (file.exists(bot.config.dir)) {
     setwd(bot.config.dir)
     # move into a config sub-directory to get authentication info specific to one bot
+    cat('\n@',bot,':\n',sep='')
     source(full.daemon.path)
     setwd(top.dir) # not strictly necessary, and full paths are being used, but may avoid awkward complications if errors occur
   } else {

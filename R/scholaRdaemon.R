@@ -409,3 +409,7 @@ if (all(!is.na(recent.papers))) { # the CheckMail function would return NA [once
   recent.paper.mail.ids <- names(recent.papers) # not actually paper names, just the message IDs
   CheckMessageHistory(recent.paper.mail.ids)
 }
+
+# clean up namespace
+
+remove('sd.config') # clears the bot-specific configuration (otherwise will be prompted to enter search query)
