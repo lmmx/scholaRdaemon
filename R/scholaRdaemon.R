@@ -105,7 +105,11 @@ if (!file.exists('twitter_authfile.json')) {
 TwitterAuth <- function(authfile.name = 'twitter_authfile.json') {
   cat('\nAuthorising Twitter\n')
   twitter.authinfo <- fromJSON('twitter_authfile.json')$info
-  do.call(setup_twitter_oauth, as.list(twitter.authinfo))
+  if (length(twitter.authinfo) == 2 && file.exists('.httr-oauth')) {
+    h.o.file <- readRDS('.httr-oauth')
+    h.o.tok.creds <- c(access_token = h.o.file[[1]]$credentials$oauth_token, access_secret = h.o.file[[1]]$credentials$oauth_token_secret)
+    do.call(setup_twitter_oauth, c(as.list(twitter.authinfo), as.list(h.o.tok.creds)))
+  } else do.call(setup_twitter_oauth, as.list(twitter.authinfo))
 }
 
 TwitterAuth()

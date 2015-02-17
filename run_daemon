@@ -92,7 +92,7 @@ if (length(args) > 0) {
   help.prompt <- paste(c('Flags\n-----', 
                          unlist(flag.prompts),
                          'Available bots [codes can be given as arguments rather than checking all accounts]\n-----------------------------------------------------------------------------',
-                         unlist(bot.prompts)),collapse="\n\n")
+                         unlist(bot.prompts),''),collapse="\n\n")
   
   # The following lines handle the flags, running the corresponding 'output' entry in flag.details for any supplied
   flag.output <- unlist(lapply(names(flag.truth.table), function(x){if (flag.truth.table[x]) return(flag.details[x][[1]][['output']])}))
