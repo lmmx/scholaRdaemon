@@ -107,6 +107,8 @@ img {
 <ul>
 <li>Wiki: <a href="https://github.com/lmmx/scholaRdaemon/wiki/Draft-workflow-with-AWS-and-dat">Proposed workflow with AWS and dat</a></li>
 </ul>
+<p>For now I’m using cron (hourly entry added with <code>crontab -e</code>), sourcing my <code>.bashrc</code> which contains the location of the scholaRdaemon directory and recording the date/time alongside run results in the <code>sd.log</code> file there:</p>
+<pre class="cron"><code>0 * * * * source /home/louis/.bashrc; date &gt;&gt; &quot;$scholaRdaemon&quot;sd.log; runsdaemon &gt;&gt; &quot;$scholaRdaemon&quot;sd.log</code></pre>
 </div>
 </div>
 

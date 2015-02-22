@@ -2,3 +2,4 @@
 *.json
 .Rproj.user
 .Rhistory
+*.log

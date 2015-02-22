@@ -45,3 +45,9 @@ crontab -l
 Cron automation makes sense for daily MEDLINE (PubMed) updates, but not for emails - IFTTT-like 'triggering' would be ideal, and can be achieved with custom 'events' through Amazon Lambda [free tier], reacting to changes in AWS S3 file storage, which [may be modified](https://github.com/jb55/s3-blob-store) with [`dat`](http://dat-data.com/)` pull --live`.
 
 * Wiki: [Proposed workflow with AWS and dat](https://github.com/lmmx/scholaRdaemon/wiki/Draft-workflow-with-AWS-and-dat)
+
+For now I'm using cron (hourly entry added with `crontab -e`), sourcing my `.bashrc` which contains the location of the scholaRdaemon directory and recording the date/time alongside run results in the `sd.log` file there:
+
+```cron
+0 * * * * source /home/louis/.bashrc; date >> "$scholaRdaemon"sd.log; runsdaemon >> "$scholaRdaemon"sd.log
+```
