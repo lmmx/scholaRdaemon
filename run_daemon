@@ -136,3 +136,5 @@ for (bot in bots) {
     warning(paste0("Skipping bot '",bot,"': config files not found. Please put them in a config/",bot," below the main scholaRdaemon directory, as in the GitHub repo at https://github.com/lmmx/scholaRdaemon"))
   }
 }
+
+remove('no.confirm')

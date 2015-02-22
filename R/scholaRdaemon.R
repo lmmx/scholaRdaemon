@@ -16,7 +16,7 @@ GetPaper <- function(article) {
   # declare a function to capitalise the first letter of any ALL CAPS titles given by Google Scholar
   ReCap <- function(title.str) {
     if (isTRUE(as.logical(grep("[[:lower:]]", title.str, invert=TRUE)))) {
-      uncap.str <- tolower(strsplit(titlestr, " ")[[1]])
+      uncap.str <- tolower(strsplit(title.str, " ")[[1]])
       return(paste(toupper(substring(uncap.str, 1,1)), substring(uncap.str, 2), sep="", collapse=" "))
     }
     else return(title.str)
@@ -323,15 +323,15 @@ ReadMail <- function(mail.id) {
   return(article.summaries)
 }
 
-GetMail <- function(search.query = sd.config[['gmail_query']]) {
-  if (!exists('sd.config') && missing('search.query')) {
+GetMail <- function(search.query = NULL) {
+  if (!exists('sd.config')) {
     cat('Set up a default search query')
     scholaRdaemonConfig()
     sd.config <- ReadSDConfig()
-
-    if (exists('sd.config')) {
-      search.query <- sd.config[['gmail_query']]
-    }
+  }
+  
+  if (missing('search.query')) {
+    search.query <- sd.config[['gmail_query']]
   }
   
   message_query <- paste0('from:scholaralerts-noreply@google.com subject:Scholar Alert ',search.query)
@@ -406,10 +406,11 @@ CheckMail <- function(confirm = F) {
 recent.papers <- CheckMail(confirm = !exists('no.confirm')) # set a variable no.confirm = T to skip tweet confirmation
 
 if (all(!is.na(recent.papers))) { # the CheckMail function would return NA [once] if the user cancels mail checking
-  recent.paper.mail.ids <- names(recent.papers) # not actually paper names, just the message IDs
+  recent.paper.mail.ids <- if (!is.null(names(recent.papers))) names(recent.papers) else dimnames(recent.papers)[[2]]
+  # not actually paper names, just the message IDs. Awkward return of one message ID, so use dimnames
   CheckMessageHistory(recent.paper.mail.ids)
 }
 
 # clean up namespace
 
-remove('sd.config') # clears the bot-specific configuration (otherwise will be prompted to enter search query)
+remove('sd.config')
