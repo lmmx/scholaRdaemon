@@ -46,7 +46,13 @@ Cron automation makes sense for daily MEDLINE (PubMed) updates, but not for emai
 
 * Wiki: [Proposed workflow with AWS and dat](https://github.com/lmmx/scholaRdaemon/wiki/Draft-workflow-with-AWS-and-dat)
 
-For now I'm using cron (hourly entry added with `crontab -e`), sourcing my `.bashrc` which contains the location of the scholaRdaemon directory and recording the date/time alongside run results in the `sd.log` file there:
+For now I'm using cron (hourly entry added with `crontab -e`) to:
+
+* source my `.bashrc` which
+  * exports the location of the scholaRdaemon directory to an eponymous variable
+  * sets an alias `runsdaemon` as `Rscript "$scholaRdaemon/run_daemon"`
+* record the date/time in the `sd.log` file there
+* run the daemon for all bots (default behaviour, for all bots listed in `config/bot_registry.json`)
 
 ```cron
 0 * * * * source /home/louis/.bashrc; date >> "$scholaRdaemon"sd.log; runsdaemon >> "$scholaRdaemon"sd.log
