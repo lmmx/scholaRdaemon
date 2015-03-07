@@ -8,8 +8,8 @@ library('XML', warn.conflicts = F)
 gmail_auth('gmail_authfile.json')
 
 # Gmail decoding functions
-Base64URL_Decode_To_Char <- function(x) { rawToChar(Base64URL_Decode(x)) }
 Base64URL_Decode <- function(x) { base64decode(gsub("_", "/", gsub("-", "+", x))) }
+Base64URL_Decode_To_Char <- function(x) { rawToChar(Base64URL_Decode(x)) }
 
 # Gmail parsing functions
 GetPaper <- function(article) {
@@ -18,12 +18,19 @@ GetPaper <- function(article) {
     if (isTRUE(as.logical(grep("[[:lower:]]", title.str, invert=TRUE)))) {
       uncap.str <- tolower(strsplit(title.str, " ")[[1]])
       return(paste(toupper(substring(uncap.str, 1,1)), substring(uncap.str, 2), sep="", collapse=" "))
-    }
-    else return(title.str)
+    } else return(title.str)
+  }
+  
+  checkURLstr <- function(url.str) {
+    if (isTRUE(as.logical(grep("^https?://books\\.google\\.co[m|\\.uk]", url.str)))) {
+      return(URLdecode(url.str))
+    } else return(url.str)
   }
   
   list("title" = sapply(xmlValue(article[["a"]]), ReCap, USE.NAMES = F),
-       "url" = strsplit(strsplit(xmlAttrs(article[["a"]])[["href"]], "scholar.google.co.uk/scholar_url\\?url=")[[1]][2], "\\&hl=en&sa=X\\&scisig=")[[1]][[1]])
+       "url" = checkURLstr(strsplit(strsplit(xmlAttrs(article[["a"]])[["href"]],
+                                 "scholar.google.co.uk/scholar_url\\?url=")[[1]][2],
+                        "\\&hl=en&sa=X\\&scisig=")[[1]][[1]]))
   # removes Google's prefix + suffix to give the source URL
 }
 
@@ -133,7 +140,7 @@ abbrev.list <- list( microRNA = "miRNA",
                      "Escherichia coli" = "E. coli",
                      ribonuclease = "RNAse",
                      "nuclear magnetic resonance" = "NMR",
-#                     regulation = "reg.", # No capitalisation awareness and often the first word...
+                     regulation = "reg.",
                      knockout = "k/o",
                      "protein-protein interaction" = "PPI",
                      #                    interaction = "intxn", # Not the most obvious abbreviation so commenting it out
